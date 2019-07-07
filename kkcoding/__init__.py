@@ -1,5 +1,6 @@
 'kkcoding-cli - Command-line Interface for KKCoding.net'
 
+import argparse
 import getpass
 import json
 import os
@@ -8,27 +9,35 @@ import sys
 import requests
 
 
-def login(username, password):
-    'Login with username and password'
+def login(username: str, password: str) -> dict:
+    'Login with the given username and password'
     return json.loads(requests.post('http://www.kkcoding.net/thrall-web/user/login',
                                     json={'name': username, 'password': password}).text)
 
-def main(args):
+def main(*argv: argparse.Namespace):
     "__name == '__main__'"
-    confdir = os.path.join(os.path.expanduser('~'), '.kkcoding')
+    parser = argparse.ArgumentParser('kkcoding')
+    parser.add_argument('--config-dir', nargs='?',
+                        default=os.path.join(os.path.expanduser('~'), '.kkcoding'))
+    subparsers = parser.add_subparsers(dest='command', required=True, help='Command')
+    parser_login = subparsers.add_parser('login', help=login.__doc__)
+    parser_login.add_argument('username', nargs='?', default='', help='Your username')
+    subparsers.add_parser('logout', help='Logout')
+    args = parser.parse_args(argv)
+    confdir = args.config_dir
     os.makedirs(confdir, exist_ok=True)
-    if args[0] == 'login':
-        res = login(input('Username: '), getpass.getpass())
-        if not res['data']:
+    open(os.path.join(confdir, 'token.txt'), 'w+').close()
+    if args.command == 'login':
+        res = login(args.username or input('Username: '), getpass.getpass())
+        if res['code'] != 200:
             raise Exception(res['msg'])
-        user = res['data']
-        token = user['ticket']
+        token = res['data']['ticket']
         with open(os.path.join(confdir, 'token.txt'), 'w') as file:
             file.write(token)
-    elif args[0] == 'logout':
+    elif args.command == 'logout':
         os.remove(os.path.join(confdir, 'token.txt'))
     else:
         token = open(os.path.join(confdir, 'token.txt')).read()
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main(*sys.argv[1:])
