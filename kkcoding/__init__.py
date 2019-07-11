@@ -32,7 +32,7 @@ def main(*argv: argparse.Namespace):
         res = login(args.username or input('Username: '), getpass.getpass())
         if res['code'] != 200:
             raise Exception(res['msg'])
-        elif res['msg']:
+        if res['msg']:
             print(res['msg'])
         token = res['data']['ticket']
         with open(os.path.join(confdir, 'token.txt'), 'w') as file:
@@ -45,7 +45,7 @@ def main(*argv: argparse.Namespace):
                                       headers={'token': token}).text)
         if res['code'] != 200:
             raise Exception(res['msg'])
-        elif res['msg']:
+        if res['msg']:
             print(res['msg'])
 
 if __name__ == '__main__':
