@@ -9,10 +9,12 @@ import sys
 import requests
 
 
-def login(username: str, password: str) -> dict:
+
+def login(name: str, password: str) -> dict:
     'Login with the given username and password'
     return json.loads(requests.post('http://www.kkcoding.net/thrall-web/user/login',
-                                    json={'name': username, 'password': password}).text)
+                                    json={'name': name, 'password': password}).text)
+
 
 def main(*argv: argparse.Namespace):
     "__name == '__main__'"
@@ -21,7 +23,7 @@ def main(*argv: argparse.Namespace):
                         default=os.path.join(os.path.expanduser('~'), '.kkcoding'))
     subparsers = parser.add_subparsers(dest='command', required=True, help='Command')
     parser_login = subparsers.add_parser('login', help=login.__doc__)
-    parser_login.add_argument('username', nargs='?', default='', help='Your username')
+    parser_login.add_argument('name', nargs='?', default='', help='Your username')
     subparsers.add_parser('logout', help='Logout')
     subparsers.add_parser('sign', help='Daily sign')
     args = parser.parse_args(argv)
@@ -29,7 +31,7 @@ def main(*argv: argparse.Namespace):
     os.makedirs(confdir, exist_ok=True)
     open(os.path.join(confdir, 'token.txt'), 'a').close()
     if args.command == 'login':
-        res = login(args.username or input('Username: '), getpass.getpass())
+        res = login(args.name or input('Username: '), getpass.getpass())
         if res['code'] != 200:
             raise Exception(res['msg'])
         if res['msg']:
@@ -41,12 +43,16 @@ def main(*argv: argparse.Namespace):
         os.remove(os.path.join(confdir, 'token.txt'))
     elif args.command == 'sign':
         token = open(os.path.join(confdir, 'token.txt')).read()
-        res = json.loads(requests.get('http://www.kkcoding.net/thrall-web/sign/dailySign',
-                                      headers={'token': token}).text)
+        try:
+            res = json.loads(requests.get('http://www.kkcoding.net/thrall-web/sign/dailySign',
+                                          headers={'token': token}).text)
+        except json.decoder.JSONDecodeError:
+            raise Exception('登录信息过期,请重新登录!')
         if res['code'] != 200:
             raise Exception(res['msg'])
         if res['msg']:
             print(res['msg'])
+
 
 if __name__ == '__main__':
     main(*sys.argv[1:])
