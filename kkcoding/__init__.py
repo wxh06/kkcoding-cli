@@ -16,6 +16,12 @@ def login(name: str, password: str) -> dict:
                                     json={'name': name, 'password': password}).text)
 
 
+def daily_sign(token: str) -> dict:
+    'Daily sign'
+    return json.loads(requests.get('http://www.kkcoding.net/thrall-web/sign/dailySign',
+                                   headers={'token': token}).text)
+
+
 def main(*argv: argparse.Namespace):
     "__name == '__main__'"
     parser = argparse.ArgumentParser('kkcoding')
@@ -44,8 +50,7 @@ def main(*argv: argparse.Namespace):
     elif args.command == 'sign':
         token = open(os.path.join(confdir, 'token.txt')).read()
         try:
-            res = json.loads(requests.get('http://www.kkcoding.net/thrall-web/sign/dailySign',
-                                          headers={'token': token}).text)
+            res = daily_sign(token)
         except json.decoder.JSONDecodeError:
             raise Exception('登录信息过期,请重新登录!')
         if res['code'] != 200:
