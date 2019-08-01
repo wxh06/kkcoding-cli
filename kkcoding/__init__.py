@@ -26,7 +26,7 @@ def daily_sign(token: str) -> dict:
                                    headers={'token': token}).text)
 
 
-def main(*argv: argparse.Namespace):
+def main(*argv: list):
     "__name == '__main__'"
     parser = argparse.ArgumentParser('kkcoding')
     parser.add_argument('--config-dir', nargs='?',
