@@ -66,5 +66,9 @@ def main(*argv: list):
             print(res['msg'])
 
 
-if __name__ == '__main__':
+def console():
     main(*sys.argv[1:])
+
+
+if __name__ == '__main__':
+    console()
