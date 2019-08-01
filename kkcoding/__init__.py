@@ -8,17 +8,21 @@ import sys
 
 import requests
 
+__version__ = '0.0.1'
 
 
 def login(name: str, password: str) -> dict:
     'Login with the given username and password'
-    return json.loads(requests.post('http://www.kkcoding.net/thrall-web/user/login',
-                                    json={'name': name, 'password': password}).text)
+    return json.loads(requests.post('http://www.kkcoding.net'
+                                    '/thrall-web/user/login',
+                                    json={'name': name,
+                                          'password': password}).text)
 
 
 def daily_sign(token: str) -> dict:
     'Daily sign'
-    return json.loads(requests.get('http://www.kkcoding.net/thrall-web/sign/dailySign',
+    return json.loads(requests.get('http://www.kkcoding.net'
+                                   '/thrall-web/sign/dailySign',
                                    headers={'token': token}).text)
 
 
@@ -26,10 +30,13 @@ def main(*argv: argparse.Namespace):
     "__name == '__main__'"
     parser = argparse.ArgumentParser('kkcoding')
     parser.add_argument('--config-dir', nargs='?',
-                        default=os.path.join(os.path.expanduser('~'), '.kkcoding'))
-    subparsers = parser.add_subparsers(dest='command', required=True, help='Command')
+                        default=os.path.join(os.path.expanduser('~'),
+                                             '.kkcoding'))
+    subparsers = parser.add_subparsers(dest='command',
+                                       required=True, help='Command')
     parser_login = subparsers.add_parser('login', help=login.__doc__)
-    parser_login.add_argument('name', nargs='?', default='', help='Your username')
+    parser_login.add_argument('name', nargs='?',
+                              default='', help='Your username')
     subparsers.add_parser('logout', help='Logout')
     subparsers.add_parser('sign', help='Daily sign')
     args = parser.parse_args(argv)
