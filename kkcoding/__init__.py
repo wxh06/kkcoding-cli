@@ -67,6 +67,7 @@ def main(*argv: list):
 
 
 def console():
+    'kkcoding'
     main(*sys.argv[1:])
 
 
